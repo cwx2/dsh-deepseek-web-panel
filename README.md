@@ -6,8 +6,7 @@
 把 **chat.deepseek.com 网页版**当作一个面板嵌进 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)：
 左侧栏点「网页版」，主区域就是完整的网页版界面，聊过的会话、登录状态都在。
 
-<!-- 截图占位：请把打码后的截图放到 docs/images/panel.png，然后启用下面这行 -->
-<!-- ![面板截图](https://raw.githubusercontent.com/cwx2/dsh-deepseek-web-panel/main/docs/images/panel.png) -->
+![面板截图](https://raw.githubusercontent.com/cwx2/dsh-deepseek-web-panel/main/docs/images/panel.png)
 
 > 这不是官方插件。它把你自己账号的网页版页面装进 Harness，行为和你用浏览器打开一样。
 
