@@ -1,6 +1,6 @@
 {
   "name": "dsh-deepseek-web-panel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Embed chat.deepseek.com as a left-sidebar panel in DeepSeek Harness; sign-in and the last conversation persist through a local loopback proxy.",
   "keywords": [
     "dsh",
