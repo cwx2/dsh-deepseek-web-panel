@@ -89,13 +89,39 @@ npm.cmd view dsh-deepseek-web-panel version
 
 再到 <https://www.npmjs.com/package/dsh-deepseek-web-panel> 看一眼描述和 README 是否正常。
 
-## 6. 建 GitHub Release
+## 6. GitHub Release 会自动创建
 
-仓库 → Releases → Draft a new release → 选刚打的 tag → 标题写版本号 →
-正文粘 `CHANGELOG.md` 里对应那节 → Publish。
+`.github/workflows/release.yml` 在推送 `v*` tag 时自动：
 
-## 7. 让用户更新
+1. 跑 `npm run check`；
+2. `npm pack` 出 tarball；
+3. 用 tarball 建一个 GitHub Release。
+
+所以 `git push --follow-tags` 之后，去仓库 Releases 页面确认一下即可，不用手工上传附件。
+
+## 7. 更新插件索引（每次发版都要做）
+
+索引里写死了 commit sha，发版后必须重新生成，否则 Discover 里装到的还是旧代码：
+
+```powershell
+node scripts/index.mjs
+git add docs/index.json
+git commit -m "chore: refresh the plugin index for vX.Y.Z"
+git push
+```
+
+## 8. 首次启用 GitHub Pages（只做一次）
+
+索引要通过 HTTPS 对外提供，用户才能把它加进 Discover：
+
+1. 仓库 → Settings → Pages；
+2. Source 选 **Deploy from a branch**，分支 `main`、目录 `/docs`；
+3. 保存后等一两分钟，访问确认能打开：
+   `https://cwx2.github.io/dsh-deepseek-web-panel/index.json`
+
+## 9. 让用户更新
 
 - 从 npm 装的用户：插件页会出现 **Update**；
-- 从 Git 装的用户：需要卸载再装；
+- 从 Git 装的用户：需要卸载再装（`github:` 源不跟踪新提交）；
+- 从索引装的用户：Discover 里能看到新版本，一键安装；
 - 版本号不变的话，任何人都拿不到新代码。

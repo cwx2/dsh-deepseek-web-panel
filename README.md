@@ -36,6 +36,16 @@ dsh plugin --profile web add dsh-deepseek-web-panel
 dsh plugin --profile web add github:<你的账号>/dsh-deepseek-web-panel
 ```
 
+## 在 DSH 里发现它
+
+在 **Plugins → Discover → Add index source** 添加本仓库的插件索引：
+
+```text
+https://cwx2.github.io/dsh-deepseek-web-panel/index.json
+```
+
+之后就能在 Discover 里搜到并一键安装。（需要仓库启用 GitHub Pages，见 `RELEASING.md`。）
+
 ## 使用
 
 1. 左侧栏点「网页版」。

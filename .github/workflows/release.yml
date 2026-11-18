@@ -1,0 +1,43 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check syntax
+        run: npm run check
+
+      - name: Build the tarball
+        run: npm pack
+
+      - name: Create the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: '*.tgz'
+          generate_release_notes: false
+          body: |
+            安装：
+
+            ```
+            dsh plugin --profile web add github:${{ github.repository }}
+            ```
+
+            或下载下方的 `.tgz`：
+            ```
+            dsh plugin --profile web add <tgz 绝对路径>
+            ```
+
+            已知限制：微信 / Apple 扫码登录不可用（OAuth 域名限制），请用手机号登录。
