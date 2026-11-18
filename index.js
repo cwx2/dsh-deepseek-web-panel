@@ -5,10 +5,10 @@
  * Host 侧的状态目录里，因此页面重启后仍保持登录；页面只需要知道代理地址。
  */
 
-import { HOST_SYNC_ROUTE, STATUS_ROUTE, SYNC_BODY_LIMIT } from './src/config.js';
+import { HOST_SYNC_ROUTE, STATUS_ROUTE, SYNC_BODY_LIMIT, readProxyConfig } from './src/config.js';
 import { isLoopbackOrigin, readBody, sendJson } from './src/http.js';
 import { createDeepSeekProxy } from './src/proxy.js';
-import { readProxyConfig } from './src/config.js';
+import { parseSyncBody } from './src/sync.js';
 
 /**
  * 输出带插件标记的日志，方便在 Host 日志中定位。
@@ -34,7 +34,6 @@ function createStatusResource(proxy) {
     url: proxy.url,
     running: proxy.running,
     cookies: proxy.cookieCount,
-    pendingLogin: proxy.pendingLogin,
     signedIn: proxy.signedIn,
     route: proxy.route,
   }), {
@@ -62,7 +61,7 @@ function createSyncHandler(proxy) {
         return;
       }
       if (method === 'GET' || method === 'HEAD') {
-        sendJson(res, 200, { ok: true, pending: proxy.pendingLogin, running: proxy.running });
+        sendJson(res, 200, { ok: true, signedIn: proxy.signedIn, running: proxy.running });
         return;
       }
       if (method !== 'POST') {
@@ -70,13 +69,14 @@ function createSyncHandler(proxy) {
         return;
       }
       const body = await readBody(req, SYNC_BODY_LIMIT);
-      const queued = proxy.queueLogin(body.toString('utf8'));
-      if (!queued.ok) {
-        sendJson(res, 400, queued);
+      const payload = parseSyncBody(body, req.headers['content-type']);
+      if (!payload) {
+        sendJson(res, 400, { ok: false, error: 'expected a chat.deepseek.com login token' });
         return;
       }
-      log('info', '已从 Harness 同源路由收到登录态');
-      sendJson(res, 200, { ok: true, pending: true, url: proxy.url });
+      const stored = proxy.rememberLogin(payload);
+      if (stored) log('info', '已从 Harness 同源路由记住登录态');
+      sendJson(res, 200, { ok: true, stored, signedIn: proxy.signedIn, url: proxy.url });
     } catch (error) {
       const status = error?.code === 'BODY_TOO_LARGE' ? 413 : 500;
       sendJson(res, status, {

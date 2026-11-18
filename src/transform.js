@@ -6,7 +6,7 @@ import { CDN_ORIGIN, LOCAL_PREFIX } from './config.js';
 export { LOCAL_PREFIX } from './config.js';
 
 /** 上游 HTML/CSS 使用的资源前缀。 */
-export const CDN_PREFIX = `${CDN_ORIGIN}/chat/`;
+const CDN_PREFIX = `${CDN_ORIGIN}/chat/`;
 
 /**
  * 把 HTML 中的 CDN 资源改成代理地址，并去掉改写后不再有效的完整性和跨域属性。

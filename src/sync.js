@@ -7,7 +7,7 @@
  * 3. 登录态捕获：页面里出现新 token（用户自己登录）时回传 Host，下次继续复用。
  */
 
-import { SYNC_ACK_PATH, TOKEN_LIMIT } from './config.js';
+import { TOKEN_LIMIT } from './config.js';
 
 /**
  * 在 HTML 的 head 开头插入一段内联脚本。
@@ -170,22 +170,4 @@ export function createBootScript(payload) {
  */
 export function injectBootScript(html, payload) {
   return injectAtHead(html, createBootScript(payload));
-}
-
-/**
- * 兼容旧调用：只注入登录态回填。
- * @param {string} html 上游 HTML。
- * @param {{ token: string, id: string | null, syncId?: string }} payload 规范化登录态。
- * @returns {string} 注入脚本后的 HTML。
- */
-export function injectSyncScript(html, payload) {
-  const data = JSON.stringify({ token: payload.token, id: payload.id ?? null, syncId: payload.syncId }).replace(/</g, '\\u003c');
-  const script =
-    '<script data-dsh-deepseek-sync="1">(function(){try{' +
-    `var d=${data};` +
-    'localStorage.setItem("userToken",JSON.stringify({value:d.token,__version:"0"}));' +
-    'localStorage.setItem("__appKit_userInfo",JSON.stringify({value:{id:d.id},__version:"0"}));' +
-    `if(d.syncId)fetch(${JSON.stringify(SYNC_ACK_PATH)},{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({syncId:d.syncId}),keepalive:true}).catch(function(){});` +
-    '}catch(e){}})();</script>';
-  return injectAtHead(html, script);
 }

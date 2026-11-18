@@ -179,9 +179,8 @@ export function createForwardHandlers({ agent, jar, login, origin, log, debug, f
               const decoded = decodeBody(Buffer.concat(chunks), response.headers['content-encoding']);
               const { html, replaced } = rewriteHtml(decoded.toString('utf8'), origin());
               if (replaced === 0) log('warn', 'document had no CDN asset URLs to rewrite');
-              // 每次加载都注入：UA 规范化 + 已记住的登录态 + 登录态捕获。
-              const payload = login.pending ?? login.saved;
-              const body = Buffer.from(injectBootScript(html, payload), 'utf8');
+              // 每次加载都注入：UA 规范化 + 已记住的登录态 + 登录态捕获 + 位置上报。
+              const body = Buffer.from(injectBootScript(html, login.saved), 'utf8');
               res.writeHead(status, {
                 ...responseHeaders(response.headers, { origin: origin(), dropBodyFields: true }),
                 'content-length': String(body.length),

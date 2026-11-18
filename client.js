@@ -50,7 +50,6 @@ window.__ModuleLoader__.load({
           + '用手机号登录进的是同一个账号，聊天记录都在。',
         advanced: '高级：手动同步登录',
         advancedHint: '只有“明明登录了却每次都要重新登录”时才需要用到，会涉及一段代码。',
-        close: '关闭',
 
         syncTitle: '手动同步登录（高级）',
         syncHint:
@@ -92,7 +91,6 @@ window.__ModuleLoader__.load({
           + ' and this panel runs on a local address. Signing in by phone reaches the same account.',
         advanced: 'Advanced: sync a sign-in manually',
         advancedHint: 'Only needed when the panel keeps asking you to sign in. It involves a code snippet.',
-        close: 'Close',
 
         syncTitle: 'Sync a sign-in manually (advanced)',
         syncHint:
@@ -337,7 +335,7 @@ window.__ModuleLoader__.load({
      * @returns {object} 弹窗元素。
      */
     function LoginHelp({ t, onClose, onAdvanced }) {
-      return modal(t, {
+      return modal({
         title: t('helpTitle'),
         onClose,
         children: [
@@ -401,7 +399,7 @@ window.__ModuleLoader__.load({
           });
       };
 
-      return modal(t, {
+      return modal({
         title: t('syncTitle'),
         onClose,
         children: [
@@ -470,7 +468,7 @@ window.__ModuleLoader__.load({
      * @param {{title: string, onClose: Function, children: object[]}} options 标题、关闭回调和内容。
      * @returns {object} 遮罩加卡片。
      */
-    function modal(t, { title, onClose, children }) {
+    function modal({ title, onClose, children }) {
       return h(
         'div',
         {

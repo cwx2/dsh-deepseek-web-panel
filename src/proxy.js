@@ -2,12 +2,11 @@
 import http from 'node:http';
 import https from 'node:https';
 import path from 'node:path';
-import { DEFAULT_PORT, JAR_SAVE_DEBOUNCE_MS, LOCAL_PREFIX, SYNC_BODY_LIMIT, SYNC_PATH, SYNC_ACK_PATH, UPSTREAM_ORIGIN } from './config.js';
+import { DEFAULT_PORT, JAR_SAVE_DEBOUNCE_MS, LOCAL_PREFIX, SYNC_BODY_LIMIT, UPSTREAM_ORIGIN } from './config.js';
 import { CookieJar } from './cookies.js';
 import { createForwardHandlers } from './forward.js';
-import { isAllowedOrigin, isLoopbackHost, isLoopbackOrigin, readBody, requestPath, sendJson } from './http.js';
+import { isAllowedOrigin, isLoopbackHost, readBody, requestPath, sendJson } from './http.js';
 import { LoginStore } from './login-store.js';
-import { createProxySyncHandler } from './proxy-sync.js';
 import { RouteStore } from './route-store.js';
 import { parseSyncBody } from './sync.js';
 import { createUpgradeHandler } from './websocket.js';
@@ -20,7 +19,7 @@ const ROUTE_PATH = `${LOCAL_PREFIX}route`;
 /**
  * 创建代理；调用 start 后才监听端口，close 会保存状态并释放连接。
  * @param {{host?: string, port?: number, stateDir?: string, debug?: boolean, log?: (level: string, message: string) => void}} [options={}] 回环监听地址、首选端口、状态目录和日志选项；端口 0 表示自动分配。
- * @returns {object} 含状态字段及 start、close、queueLogin 方法的代理实例。
+ * @returns {object} 含状态字段及 start、close、rememberLogin 方法的代理实例。
  * @throws {RangeError} 地址不是回环地址，或端口不是 0..65535 整数时抛错。
  */
 export function createDeepSeekProxy(options = {}) {
@@ -32,7 +31,7 @@ export function createDeepSeekProxy(options = {}) {
   const stateDir = options.stateDir ?? path.join(process.cwd(), '.deepseek-chat');
   const log = options.log ?? (() => {});
   const jar = new CookieJar(path.join(stateDir, 'cookies.json'), log, JAR_SAVE_DEBOUNCE_MS);
-  const login = new LoginStore(path.join(stateDir, 'pending-sync.json'), log);
+  const login = new LoginStore(path.join(stateDir, 'session.json'), log);
   const routes = new RouteStore(path.join(stateDir, 'route.json'), log);
   const agent = new https.Agent({ keepAlive: true, maxSockets: 64 });
   const sockets = new Set();
@@ -63,7 +62,6 @@ export function createDeepSeekProxy(options = {}) {
   const { handleAsset, handleUpstream } = createForwardHandlers({
     agent, jar, login, origin, log, debug: options.debug === true, failRequest,
   });
-  const handleSync = createProxySyncHandler(login);
   const handleUpgrade = createUpgradeHandler({ jar, origin, log, sockets });
 
   /**
@@ -111,7 +109,7 @@ export function createDeepSeekProxy(options = {}) {
   }
 
   /**
-   * 检查请求来源，再分派控制接口、健康检查、资源和上游请求。
+   * 检查请求来源，再分派页面控制接口、健康检查、资源和上游请求。
    * @param {import('node:http').IncomingMessage} req 浏览器请求。
    * @param {import('node:http').ServerResponse} res HTTP 响应。
    * @returns {void} 具体处理器负责发送响应。
@@ -120,11 +118,8 @@ export function createDeepSeekProxy(options = {}) {
     try {
       const pathname = requestPath(req.url);
       const pathOnly = pathname.split('?')[0];
-      const control = pathOnly === SYNC_PATH || pathOnly === SYNC_ACK_PATH;
-      if (!isAllowedOrigin(req.headers.origin, origin()) && !(control && isLoopbackOrigin(req.headers.origin))) {
+      if (!isAllowedOrigin(req.headers.origin, origin())) {
         sendJson(res, 403, { ok: false, error: 'cross-origin request rejected' });
-      } else if (control) {
-        void handleSync(req, res, pathOnly).catch((error) => failRequest(res, error));
       } else if (pathOnly === CAPTURE_PATH) {
         void handleCapture(req, res).catch((error) => failRequest(res, error));
       } else if (pathOnly === ROUTE_PATH) {
@@ -132,7 +127,7 @@ export function createDeepSeekProxy(options = {}) {
       } else if (pathOnly === `${LOCAL_PREFIX}health`) {
         sendJson(res, 200, {
           ok: true, url: baseUrl, cookies: jar.size(), upstream: UPSTREAM_ORIGIN,
-          pendingLogin: login.pending !== null, signedIn: login.saved !== null, route: routes.route,
+          signedIn: login.saved !== null, route: routes.route,
         });
       } else if (pathOnly.startsWith(LOCAL_PREFIX)) handleAsset(req, res, pathname);
       else handleUpstream(req, res, pathname);
@@ -175,18 +170,16 @@ export function createDeepSeekProxy(options = {}) {
     get port() { return listeningPort; },
     /** @returns {number} 当前 Host Cookie 数量。 */
     get cookieCount() { return jar.size(); },
-    /** @returns {boolean} 是否有等待注入的凭据。 */
-    get pendingLogin() { return login.pending !== null; },
     /** @returns {boolean} 是否已记住一份长期登录态。 */
     get signedIn() { return login.saved !== null; },
     /** @returns {string | null} 上次页面所在位置，供面板恢复。 */
     get route() { return routes.route; },
     /**
-     * 校验并排队一份凭据，下一次文档加载时使用。
+     * 记住一份凭据，下一次文档加载时注入。
      * @param {unknown} payload 用户粘贴的 token 或 JSON。
-     * @returns {{ok: true} | {ok: false, error: string}} 入队结果，不返回凭据。
+     * @returns {boolean} 是否写入了新凭据。
      */
-    queueLogin(payload) { return login.queue(payload); },
+    rememberLogin(payload) { return login.remember(payload); },
     /**
      * 加载状态并启动；并发调用共用一次启动，只有端口占用时才自动换端口。
      * @returns {Promise<object>} 已启动的当前代理实例。

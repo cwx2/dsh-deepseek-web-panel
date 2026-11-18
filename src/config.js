@@ -7,7 +7,7 @@
 import os from 'node:os';
 import path from 'node:path';
 
-/** 本地资源和控制接口共用的路径前缀。 */
+/** 代理内部路由（页面同源，非 Harness 路由）共用的路径前缀。 */
 export const LOCAL_PREFIX = '/__ds/';
 /** 页面查询代理状态的 Harness 同源路由。 */
 export const STATUS_ROUTE = '/plugins/deepseek-web-panel/status';
@@ -27,11 +27,7 @@ export const ASSET_CACHE_TTL_MS = 10 * 60 * 1000;
 export const ASSET_CACHE_ENTRIES = 96;
 /** Cookie 写盘防抖时间。 */
 export const JAR_SAVE_DEBOUNCE_MS = 250;
-/** 登录态同步接口的路径前缀。 */
-export const SYNC_PATH = `${LOCAL_PREFIX}sync`;
-/** 登录态同步成功确认接口。 */
-export const SYNC_ACK_PATH = `${SYNC_PATH}/ack`;
-/** 登录态同步请求体最大字节数。 */
+/** 登录态请求体最大字节数。 */
 export const SYNC_BODY_LIMIT = 64 * 1024;
 /** 登录 token 最大字符数，防止异常输入占满内存。 */
 export const TOKEN_LIMIT = 8192;
