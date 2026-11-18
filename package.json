@@ -1,0 +1,73 @@
+{
+  "name": "dsh-deepseek-web-panel",
+  "version": "0.1.0",
+  "description": "把 chat.deepseek.com 网页版作为左侧栏面板嵌入 DeepSeek Harness，登录态和上次会话由本机回环代理记住。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek",
+    "deepseek-harness",
+    "cordis-plugin",
+    "panel",
+    "webview"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Programming Xiaoqiang",
+    "email": "3070428133@qq.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cwx2/dsh-deepseek-web-panel.git"
+  },
+  "homepage": "https://github.com/cwx2/dsh-deepseek-web-panel#readme",
+  "bugs": {
+    "url": "https://github.com/cwx2/dsh-deepseek-web-panel/issues"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "icon": "./assets/icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./assets/icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "src",
+    "cordis.patch.yml",
+    "locale",
+    "assets",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": "^22.18.0 || >=24.11.0",
+    "dsh": ">=0.2.2-rc.1 <0.2.3-0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check client.js"
+  }
+}

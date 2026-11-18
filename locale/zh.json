@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "DeepSeek 网页版面板",
+    "description": "在左侧栏直接打开 chat.deepseek.com，登录态由本机 Host 回环代理保存，重启 Harness 后仍然有效。"
+  }
+}

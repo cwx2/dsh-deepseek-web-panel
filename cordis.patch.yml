@@ -1,0 +1,5 @@
+# Bundle 层：把 Host 半边插入 Cordis 插件树。
+# 浏览器半边由 package.json 的 dsh.client 单独声明，不在这里插入。
+- insert:
+    - id: deepseek-web-panel
+      name: 'dsh-deepseek-web-panel'
