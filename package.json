@@ -1,7 +1,7 @@
 {
   "name": "dsh-deepseek-web-panel",
   "version": "0.1.0",
-  "description": "把 chat.deepseek.com 网页版作为左侧栏面板嵌入 DeepSeek Harness，登录态和上次会话由本机回环代理记住。",
+  "description": "Embed chat.deepseek.com as a left-sidebar panel in DeepSeek Harness; sign-in and the last conversation persist through a local loopback proxy.",
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -43,7 +43,8 @@
     "assets",
     "README.md",
     "LICENSE",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "RELEASING.md"
   ],
   "engines": {
     "node": "^22.18.0 || >=24.11.0",

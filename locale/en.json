@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "DeepSeek web panel",
-    "description": "Opens chat.deepseek.com as a left-sidebar panel; a loopback Host proxy keeps the web sign-in across Harness restarts."
+    "description": "Open chat.deepseek.com as a left-sidebar panel; the sign-in and the last conversation are remembered."
   }
 }
