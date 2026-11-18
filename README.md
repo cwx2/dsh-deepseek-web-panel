@@ -41,10 +41,13 @@ dsh plugin --profile web add github:<你的账号>/dsh-deepseek-web-panel
 在 **Plugins → Discover → Add index source** 添加本仓库的插件索引：
 
 ```text
-https://cwx2.github.io/dsh-deepseek-web-panel/index.json
+https://cdn.jsdelivr.net/gh/cwx2/dsh-deepseek-web-panel@main/docs/index.json
 ```
 
-之后就能在 Discover 里搜到并一键安装。（需要仓库启用 GitHub Pages，见 `RELEASING.md`。）
+之后就能在 Discover 里搜到并一键安装。
+
+> 索引也可以从原始地址读取：`https://raw.githubusercontent.com/cwx2/dsh-deepseek-web-panel/main/docs/index.json`
+> （DSH 只校验 2xx、无重定向、UTF-8 JSON，不限制 Content-Type。）
 
 ## 使用
 

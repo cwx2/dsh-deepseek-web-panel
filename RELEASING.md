@@ -110,14 +110,22 @@ git commit -m "chore: refresh the plugin index for vX.Y.Z"
 git push
 ```
 
-## 8. 首次启用 GitHub Pages（只做一次）
+## 8. 索引地址（Pages 是可选的）
 
-索引要通过 HTTPS 对外提供，用户才能把它加进 Discover：
+索引不需要单独建站，也不需要必须开 GitHub Pages。DSH 只要求该地址返回
+2xx、无重定向、UTF-8 JSON，不检查 `Content-Type`。现用地址：
+
+```text
+https://cdn.jsdelivr.net/gh/cwx2/dsh-deepseek-web-panel@main/docs/index.json
+```
+
+jsDelivr 会把 `@main` 缓存一段时间（发版后可能延迟），想要即时生效可以开 Pages：
 
 1. 仓库 → Settings → Pages；
 2. Source 选 **Deploy from a branch**，分支 `main`、目录 `/docs`；
-3. 保存后等一两分钟，访问确认能打开：
-   `https://cwx2.github.io/dsh-deepseek-web-panel/index.json`
+3. 访问 `https://cwx2.github.io/dsh-deepseek-web-panel/index.json` 确认。
+
+`docs/.nojekyll` 已经提交，Pages 会原样提供静态文件。
 
 ## 9. 让用户更新
 
