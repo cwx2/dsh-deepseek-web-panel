@@ -185,9 +185,17 @@ window.__ModuleLoader__.load({
         const [syncOpen, setSyncOpen] = React.useState(false);
         const [bannerDismissed, setBannerDismissed] = React.useState(false);
 
-        /** 查询代理地址和登录状态；失败时给出可重试状态。 */
-        const attempt = React.useCallback(() => {
-          setFailure(false);
+        /**
+         * 查询代理状态。
+         *
+         * `withRoute` 为 true 时同时恢复上次位置——只有挂载/重试才这么做；
+         * 轮询只用它刷新登录状态，否则每 5 秒换一次 iframe 地址会不断重载页面。
+         *
+         * @param {boolean} withRoute 是否读取并应用 route。
+         * @param {boolean} [reportFailure=true] 失败时是否显示“不可用”状态。
+         */
+        const loadStatus = React.useCallback((withRoute, reportFailure = true) => {
+          if (reportFailure) setFailure(false);
           fetch(STATUS_ROUTE, { headers: { accept: 'application/json' }, cache: 'no-store' })
             .then((response) => (response.ok ? response.json() : Promise.reject(new Error(String(response.status)))))
             .then((payload) => {
@@ -196,19 +204,31 @@ window.__ModuleLoader__.load({
               setOrigin(url.replace(/\/$/, ''));
               setSignedIn(typeof payload.signedIn === 'boolean' ? payload.signedIn : null);
               // 恢复到上次停留的会话，而不是每次都回到首页。
-              if (typeof payload.route === 'string' && payload.route.startsWith('/') && !payload.route.startsWith('//')) {
+              if (withRoute && typeof payload.route === 'string'
+                && payload.route.startsWith('/') && !payload.route.startsWith('//')) {
                 setRoute(payload.route);
               }
             })
             .catch(() => {
+              // 轮询失败不做处理，避免网络抖动时把整个面板打成错误态。
+              if (!reportFailure) return;
               setOrigin(null);
               setFailure(true);
             });
         }, []);
 
+        /** 挂载时加载一次完整状态（含位置）。 */
+        const attempt = React.useCallback(() => loadStatus(true), [loadStatus]);
+
         React.useEffect(() => {
           attempt();
         }, [attempt]);
+
+        // 登录可能发生在 iframe 里任何时候；每 4 秒核对一次登录状态。
+        React.useEffect(() => {
+          const timer = setInterval(() => loadStatus(false, false), 4000);
+          return () => clearInterval(timer);
+        }, [loadStatus]);
 
         const source = origin ? `${origin}${route}` : null;
         const showBanner = Boolean(source) && signedIn === false && !bannerDismissed;
