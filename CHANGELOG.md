@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- 修复：登录完成后顶部状态一直显示「未登录」（改为每 4 秒轮询，且不重载 iframe）
+- 新增：插件索引 docs/index.json，可在 Plugins → Discover 里搜索安装
+- 新增：.github/workflows/release.yml，推送 tag 时自动构建并发布 Release
+
 ## 0.1.0
 
 首个公开版本。
